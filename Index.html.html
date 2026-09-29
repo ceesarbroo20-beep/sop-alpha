@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <title>S.O.P. Alpha</title>
+  <style>
+    :root {
+      --bg:#000; --base:#1C1C1E; --line:#2C2C2E; --ink:#F2F2F7; --dim:#8E8E93;
+      --amber:#FF9F0A; --green:#30D158; --red:#FF453A; --blue:#0A84FF;
+      --thumb:60px; --safe-b:max(10px,env(safe-area-inset-bottom)); --safe-t:max(8px,env(safe-area-inset-top));
+    }
+    * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html,body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,system-ui,sans-serif; }
+    body { padding-bottom:calc(var(--thumb) + 76px + var(--safe-b)); }
+    .wrap { max-width:430px; margin:0 auto; }
+    header { position:sticky; top:0; z-index:20; padding:var(--safe-t) 16px 10px; background:#000; border-bottom:1px solid var(--line); }
+    .brand { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--dim); }
+    .folio { font-family:ui-monospace,Menlo,monospace; font-size:13px; margin-top:4px; }
+    .meta { display:flex; justify-content:space-between; gap:8px; margin-top:5px; font-size:12px; color:var(--dim); }
+    .st-on { color:var(--amber); } .st-ok { color:var(--green); }
+    main { padding:12px 16px 8px; }
+    h1 { font-size:20px; margin:0 0 6px; }
+    .sub,.step { color:var(--dim); font-size:12px; margin:0 0 8px; }
+    .step { letter-spacing:.08em; text-transform:uppercase; margin:12px 0 6px; }
+    textarea { width:100%; min-height:110px; resize:vertical; background:var(--base); color:var(--ink); border:1px solid var(--line); border-radius:16px; padding:12px; font-size:17px; }
+    textarea[readonly] { opacity:.7; }
+    .btn { display:flex; align-items:center; justify-content:center; text-align:center; min-height:var(--thumb); border-radius:14px; border:1px solid var(--line); background:var(--base); color:var(--ink); font-size:14px; font-weight:650; padding:8px 10px; }
+    .btn.on { border-color:var(--amber); background:#2A1C00; color:var(--amber); }
+    .btn.go { border-color:var(--green); color:var(--green); }
+    .btn.red { background:#3B0B0B; border-color:var(--red); color:#FF8A84; }
+    .btn.lock { opacity:.4; }
+    .btn:disabled { opacity:.35; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .stack { display:flex; flex-direction:column; gap:8px; }
+    .chips { display:flex; gap:8px; overflow-x:auto; padding:4px 0; }
+    .chip { flex:0 0 auto; min-height:44px; padding:0 12px; border-radius:999px; border:1px solid var(--line); background:var(--base); color:var(--dim); font-size:13px; }
+    .chip.on { color:var(--amber); border-color:var(--amber); }
+    .tira { display:none; background:var(--base); border:1px solid var(--line); border-radius:16px; padding:12px; margin-top:12px; }
+    .tira.on { display:block; }
+    .tira b { display:block; color:var(--dim); font-size:11px; }
+    .tira p { margin:2px 0 8px; font-size:15px; }
+    .toast { display:none; margin-top:10px; color:var(--red); font-size:13px; text-align:center; }
+    .toast.on { display:block; }
+    .banner { display:none; margin-top:10px; padding:10px; border:1px solid var(--amber); border-radius:12px; color:var(--amber); font-size:13px; }
+    .banner.on { display:block; }
+    .hidden { display:none !important; }
+    .dock { position:fixed; left:0; right:0; bottom:0; z-index:25; background:#000; border-top:1px solid var(--line); padding:8px 16px var(--safe-b); max-width:430px; margin:0 auto; }
+    .nav { display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-top:6px; }
+    .nav button { background:none; border:0; color:var(--dim); min-height:40px; font-size:12px; }
+    .nav button.on { color:var(--amber); }
+    #btnProcesar { width:100%; min-height:var(--thumb); background:var(--blue); border:0; color:#fff; font-size:17px; font-weight:800; border-radius:16px; }
+    #btnSellar { width:100%; min-height:var(--thumb); border-radius:16px; font-size:15px; font-weight:800; }
+    #btnReset.arm { border-color:var(--red); color:var(--red); }
+    input.mini { width:100%; min-height:48px; background:#000; color:var(--ink); border:1px solid var(--line); border-radius:12px; padding:8px 12px; font-size:16px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">S.O.P. Alpha</div>
+      <div class="folio" id="folioLine">SIN FOLIO</div>
+      <div class="meta"><span id="canalLine">CANAL —</span><span id="estadoLine" class="st-on">SIN ORIGEN</span></div>
+      <div class="meta"><span id="clock">—</span><span id="rolLine">ROL —</span></div>
+    </header>
+    <main>
+      <section id="view-captura">
+        <h1>Captura</h1>
+        <p class="sub">Rol → origen → arribo. Iniciativa propia exige causa de abordaje. Cero rutina.</p>
+        <p class="step">Rol de unidad</p>
+        <div class="grid2">
+          <button type="button" class="btn" id="rolP">PRINCIPAL</button>
+          <button type="button" class="btn" id="rolA">APOYO</button>
+        </div>
+        <p class="step">Módulo 0 · Origen</p>
+        <div class="stack">
+          <button type="button" class="btn orig" data-origen="MENSAJE_C4_SAT">Mensaje C4 / Satélite / Radio</button>
+          <button type="button" class="btn orig" data-origen="ORDEN_DIRECTA">Orden directa de mando</button>
+          <button type="button" class="btn orig" data-origen="INICIATIVA_PROPIA" id="btnInic">Iniciativa propia / inspección</button>
+          <button type="button" class="btn red" id="btnAuxilio">AUXILIO / FLAGRANCIA</button>
+          <button type="button" class="btn" id="btnReset" disabled>DESCARTAR BORRADOR</button>
+        </div>
+        <div id="boxAboCap" class="hidden stack" style="margin-top:8px">
+          <p class="step">Causa de abordaje · obligatoria · no rutina / no aspecto</p>
+          <button type="button" class="btn aboc" data-cod="INFRAC_VIAL_FLAGRANTE">Infracción vial flagrante</button>
+          <button type="button" class="btn aboc" data-cod="CONDUCTA_EVASIVA_OBJETIVA">Conducta evasiva objetiva</button>
+          <button type="button" class="btn aboc" data-cod="DETECCION_FLAGRANTE_SITIO">Detección flagrante en sitio</button>
+          <button type="button" class="btn aboc" data-cod="SENALAMIENTO_DIRECTO">Señalamiento directo</button>
+          <button type="button" class="btn aboc" data-cod="REPORTE_C4">Reporte C4</button>
+        </div>
+        <p class="step">Recepción</p>
+        <textarea id="brutoRec" placeholder="Pega ficha C4, radio o dictado de recepción..."></textarea>
+        <div class="stack" style="margin-top:10px">
+          <button type="button" class="btn go" id="btnArribo" disabled>ARRIBO / YA LLEGUÉ</button>
+        </div>
+        <div id="boxEscena" class="hidden">
+          <p class="step">Escena (post-arribo)</p>
+          <textarea id="brutoEsc" placeholder="Lo que ves en el punto. No borra el C4."></textarea>
+        </div>
+        <div class="tira" id="tira">
+          <b>ORIGEN</b><p id="t1">S/D</p>
+          <b>RESPUESTA</b><p id="t2">S/D</p>
+          <b>ROL</b><p id="t3">S/D</p>
+          <b>FALTA</b><p id="t4">S/D</p>
+        </div>
+      </section>
+      <section id="view-indicios" class="hidden">
+        <h1>Indicios</h1>
+        <p class="sub">La escena se escribe en Captura. Hash de foto = Fase 3.</p>
+        <label class="btn" for="cam">AÑADIR INDICIO (CÁMARA)</label>
+        <input id="cam" type="file" accept="image/*" capture="environment" class="hidden" />
+        <p class="sub" id="indicioMsg" style="margin-top:12px">Sin tomas.</p>
+      </section>
+      <section id="view-cierre" class="hidden">
+        <h1>Cierre</h1>
+        <p class="sub">Celda solo si hay detenido.</p>
+        <div id="cierreApoyo" class="hidden">
+          <p class="step">Acción de apoyo</p>
+          <div class="stack" id="accApoyo"></div>
+        </div>
+        <div id="cierrePrin" class="hidden">
+          <p class="step">¿Hay detenido?</p>
+          <div class="grid2">
+            <button type="button" class="btn" id="detNo">NO</button>
+            <button type="button" class="btn" id="detSi">SÍ</button>
+          </div>
+          <div id="sinDet" class="hidden">
+            <p class="step">Familia SIN_DET</p>
+            <div class="stack" id="famBtns"></div>
+            <div id="codBtns" class="stack" style="margin-top:8px"></div>
+            <label class="btn" id="bitPenal" style="margin-top:8px">ESCENA PENAL · OFF</label>
+            <div class="banner" id="iphBanner">IPH_SIN_DETENIDO pendiente. No se redacta en calle. Producto se nombra después.</div>
+          </div>
+          <div id="conDet" class="hidden">
+            <p class="step">Fundamento Anexo D</p>
+            <div class="stack" id="fundBtns"></div>
+            <div id="faltaBox" class="hidden">
+              <p class="step">Falta administrativa</p>
+              <div class="grid2">
+                <button type="button" class="btn falta" data-cod="AOP">AOP</button>
+                <button type="button" class="btn falta" data-cod="IST">IST</button>
+                <button type="button" class="btn falta" data-cod="EBR">EBR</button>
+              </div>
+            </div>
+            <p class="step">Traslado inmediato</p>
+            <div class="stack">
+              <button type="button" class="btn tras" data-cod="TRASLADO_JC">TRASLADO_JC</button>
+              <button type="button" class="btn tras" data-cod="TRASLADO_MP">TRASLADO_MP</button>
+              <button type="button" class="btn tras" data-cod="TRASLADO_HOSP">TRASLADO_HOSP</button>
+            </div>
+            <p class="step">Ruta</p>
+            <div class="grid2">
+              <button type="button" class="btn" id="rutaA">A · PROTOCOLO</button>
+              <button type="button" class="btn" id="rutaB">B · MANDO</button>
+            </div>
+            <div id="destA" class="hidden stack" style="margin-top:8px"></div>
+            <div id="destB" class="hidden">
+              <p class="step">Autoridad</p>
+              <div class="stack">
+                <button type="button" class="btn aut" data-cod="DIR">Director 01</button>
+                <button type="button" class="btn aut" data-cod="SUB">Subdirector 02</button>
+                <button type="button" class="btn aut" data-cod="COP">Comandante operativo</button>
+                <button type="button" class="btn aut" data-cod="CAL">Juez calificador</button>
+                <button type="button" class="btn aut" data-cod="RT">RT</button>
+              </div>
+              <p class="step">Medio</p>
+              <div class="stack">
+                <button type="button" class="btn med" data-cod="RAD">Radio / Satélite</button>
+                <button type="button" class="btn med" data-cod="TEL">Llamada</button>
+                <button type="button" class="btn med" data-cod="PRE" id="medPre">Presencial</button>
+              </div>
+              <p class="step">Condición</p>
+              <div class="stack">
+                <button type="button" class="btn cond" data-cod="LIB_SIT">Liberación en sitio</button>
+                <button type="button" class="btn cond" data-cod="FAM_B">Entrega a familiar</button>
+                <button type="button" class="btn cond" data-cod="INMOV">Retiro sin aseguramiento</button>
+              </div>
+            </div>
+            <div id="rndBox" class="hidden" style="margin-top:10px">
+              <p class="step">RND</p>
+              <input class="mini" id="rndInput" placeholder="XX/XX/000/00000000/0000" />
+            </div>
+          </div>
+        </div>
+        <p class="step">Módulos</p>
+        <div class="chips">
+          <button type="button" class="chip" id="togVeh">+ Vehículo</button>
+          <button type="button" class="chip" id="togHal">+ Hallazgo</button>
+          <button type="button" class="chip" id="togAbo">+ Abordaje</button>
+          <button type="button" class="chip" id="togCjem">CJEM</button>
+          <button type="button" class="chip" id="togPro">PRONIFF</button>
+        </div>
+        <div id="boxVeh" class="hidden stack" style="margin-top:8px">
+          <input class="mini" id="placas" placeholder="Placas o S/D" />
+          <div class="grid2">
+            <button type="button" class="btn vdest" data-cod="CONV_SITIO">Convenio</button>
+            <button type="button" class="btn vdest" data-cod="GAR_48">Garantía 48h</button>
+            <button type="button" class="btn vdest" data-cod="CORRALON">Corralón</button>
+            <button type="button" class="btn vdest" data-cod="EN_SITIO">En sitio</button>
+          </div>
+        </div>
+        <div id="boxHal" class="hidden" style="margin-top:8px">
+          <input class="mini" id="halDesc" placeholder="Hallazgo corto · acta pendiente" />
+        </div>
+        <div id="boxAbo" class="hidden stack" style="margin-top:8px">
+          <p class="step">Causa de abordaje · prohibido rutina / aspecto</p>
+          <button type="button" class="btn abo" data-cod="INFRAC_VIAL_FLAGRANTE">Infracción vial flagrante</button>
+          <button type="button" class="btn abo" data-cod="CONDUCTA_EVASIVA_OBJETIVA">Conducta evasiva objetiva</button>
+          <button type="button" class="btn abo" data-cod="DETECCION_FLAGRANTE_SITIO">Detección flagrante en sitio</button>
+          <button type="button" class="btn abo" data-cod="SENALAMIENTO_DIRECTO">Señalamiento directo</button>
+          <button type="button" class="btn abo" data-cod="REPORTE_C4">Reporte C4</button>
+        </div>
+        <p class="toast" id="toast"></p>
+      </section>
+    </main>
+  </div>
+  <div class="dock" id="dock">
+    <button type="button" id="btnProcesar">PROCESAR EVENTO</button>
+    <button type="button" class="btn" id="btnSellar" disabled>SELLAR Y GUARDAR</button>
+    <nav class="nav">
+      <button type="button" class="on" data-view="captura">Captura</button>
+      <button type="button" data-view="indicios">Indicios</button>
+      <button type="button" data-view="cierre">Cierre</button>
+    </nav>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const TZ = "America/Monterrey";
+    const FAM = {
+      RESULTADO: [["ATENDIDO_SITIO","Atendido en sitio"],["CONCILIADO","Conciliado"],["SE_RETIRO","Se retiró"],["NO_LOCALIZADO","No localizado"],["SE_DIO_A_LA_FUGA","Se dio a la fuga"],["FALSO_REPORTE","Falso reporte"],["CANALIZADO","Canalizado"],["DISUASION","Disuasión"]],
+      TRANSITO: [["ACC_SIMPLE","Accidente simple"],["INFRAC_VIAL","Infracción vial"],["CORRALON","Corralón"],["VEH_ABANDONADO","Vehículo abandonado"],["INSP_SIN_NOV","Inspección sin novedad"]],
+      SOCIAL_VIAL: [["AUXILIO_VIAL","Auxilio vial"],["DISP_APOYO_PERIMETRAL","Apoyo perimetral"],["CIERRE_VIAL","Cierre vial"],["ESCOLTA","Escolta"]],
+      PC_INST: [["PERIMETRO_RIESGO","Perímetro riesgo"],["APOYO_DIF","Acompañamiento DIF"],["APOYO_PRONIFF","Acompañamiento PRONIFF"],["APOYO_CORP","Apoyo corporación"]],
+      HALLAZGO: [["OBJETO_DOC","Objeto / documento"],["MATERIA_SITIO","Materia en sitio"],["LOC_PERSONA","Persona localizada"],["ALARMA_OK","Alarma"],["PUNTO_FIJO","Punto fijo"]],
+      ESCENA_PENAL: [["PERSONA_SIN_VIDA","Persona sin vida"],["PRESERVA_ESCENA","Preserva escena"],["ENTREGA_AIC","Entrega AIC"],["ENTREGA_PERICIALES","Entrega periciales"],["AGRESOR_HUIDO","Agresor huido"],["ENTREGA_CORP","Entrega corporación"]]
+    };
+    const BLOQ = new Set(["CONCILIADO","APERC","FALSO_REPORTE","DISUASION","ACC_SIMPLE","INFRAC_VIAL","AUXILIO_VIAL","INSP_SIN_NOV"]);
+    const DEST_A = [["PAD_JC","PAD_JC"],["PAD_MP","PAD_MP"],["RESG_INC","RESG_INC"],["APERC","Apercibimiento"],["HOSP","Hospital"],["FAM_A","Entrega familiar"],["ARRESTO","Cumplió arresto"],["IMPROC","Improcedencia"]];
+    const APOYO = [["TRASLADO_JC","Traslado JC"],["TRASLADO_MP","Traslado MP"],["TRASLADO_HOSP","Traslado hospital"],["APOYO_CORDON","Cordón"],["APOYO_CATEO","Cateo"],["PERIMETRO","Perímetro"],["PRESENCIA","Presencia"]];
+    const FUND = [["FLAGRANCIA","Flagrancia"],["CASO_URGENTE","Caso urgente"],["ORDEN","Orden"],["FALTA_ADMIN","Falta admin"]];
+    const RND_RE = /^[A-Z]{2}\/[A-Z]{2}\/\d{3}\/\d{8}\/\d{4}$/;
+    let folio = null;
+    const ui = { view:"captura", rol:null, hayDet:null, fam:null, cod:null, fund:null, falta:null, tras:null, ruta:null, destA:null, aut:null, med:null, cond:null, veh:false, hal:false, abo:false, cjem:false, pro:false, penal:false, vdest:null, causa:null };
+
+    function isoNow() {
+      const p = Object.fromEntries(new Intl.DateTimeFormat("en-CA", { timeZone:TZ, year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit", hourCycle:"h23" }).formatToParts(new Date()).map((x)=>[x.type,x.value]));
+      return p.year+"-"+p.month+"-"+p.day+"T"+p.hour+":"+p.minute+":"+p.second+"-06:00";
+    }
+    function nuevoId() {
+      const p = Object.fromEntries(new Intl.DateTimeFormat("en-CA", { timeZone:TZ, year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit", hourCycle:"h23" }).formatToParts(new Date()).map((x)=>[x.type,x.value]));
+      return "MON-"+p.year+p.month+p.day+"-"+p.hour+p.minute+p.second+"-SSP223";
+    }
+    function toast(m) { const t=$("toast"); t.textContent=m; t.classList.add("on"); }
+    function mark(ns, el) { ns.forEach((b)=>b.classList.remove("on")); if (el) el.classList.add("on"); }
+    function persist() {
+      if (!folio) return;
+      try {
+        const raw = JSON.stringify(folio);
+        if (folio.estado === "SELLADO") {
+          localStorage.setItem(folio.folio_vivo, raw);
+          localStorage.setItem("bak:"+folio.folio_vivo, raw);
+          localStorage.setItem("sop.alpha.activo", folio.folio_vivo);
+          localStorage.removeItem("sop.alpha.borrador");
+        } else {
+          localStorage.setItem("sop.alpha.borrador", raw);
+        }
+      } catch(e) {}
+    }
+    async function sha256(txt) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(txt));
+      return Array.from(new Uint8Array(buf)).map((b)=>b.toString(16).padStart(2,"0")).join("");
+    }
+    let resetArm = false;
+    function resetBorrador() {
+      if (folio && folio.estado === "SELLADO") return;
+      const id = folio && folio.folio_vivo;
+      try {
+        localStorage.removeItem("sop.alpha.borrador");
+        if (id) { localStorage.removeItem(id); localStorage.removeItem("bak:"+id); }
+        if (localStorage.getItem("sop.alpha.activo") === id) localStorage.removeItem("sop.alpha.activo");
+      } catch(e) {}
+      folio = null;
+      ui.hayDet = ui.fam = ui.cod = ui.fund = ui.falta = ui.tras = ui.ruta = ui.destA = ui.aut = ui.med = ui.cond = ui.vdest = ui.causa = null;
+      ui.veh = ui.hal = ui.abo = ui.cjem = ui.pro = ui.penal = false;
+      resetArm = false;
+      $("brutoRec").value = ""; $("brutoRec").readOnly = false;
+      $("brutoEsc").value = "";
+      $("boxEscena").classList.add("hidden");
+      $("boxAboCap").classList.add("hidden");
+      $("tira").classList.remove("on");
+      $("btnArribo").textContent = "ARRIBO / YA LLEGUÉ";
+      $("btnArribo").classList.remove("on");
+      $("btnAuxilio").classList.remove("on");
+      document.querySelectorAll(".orig,.aboc,.abo").forEach((b)=>b.classList.remove("on"));
+      $("btnReset").textContent = "DESCARTAR BORRADOR";
+      $("btnReset").classList.remove("arm");
+      $("btnReset").disabled = true;
+      pintar();
+    }
+    function nacer(origen, aux) {
+      if (!ui.rol) { toast("Falta rol"); return; }
+      const h = isoNow();
+      const yaEnPunto = aux || origen === "INICIATIVA_PROPIA";
+      folio = { folio_vivo:nuevoId(), canal:"TACTICO", rol_unidad:ui.rol, modo_nacimiento:origen, estado: yaEnPunto?"EN_PUNTO":"RECEPCIONADO",
+        recepcion:{ origen:origen, hora_recepcion:h, folio_c4:"S/D" }, arribo:{ hora_arribo: yaEnPunto?h:null }, tiempo_respuesta_seg: yaEnPunto?0:null,
+        bruto_recepcion:"", bruto_escena:"", hay_detenido:false, escena_penal:false, iph_sin_detenido:false, resultado:null, instruccion:null, rnd:null };
+      persist(); pintar();
+      if (yaEnPunto) $("boxEscena").classList.remove("hidden");
+      const inic = origen === "INICIATIVA_PROPIA";
+      $("boxAboCap").classList.toggle("hidden", !inic);
+      if (inic) { ui.abo = true; $("togAbo").classList.add("on"); $("boxAbo").classList.remove("hidden"); }
+    }
+    function pintar() {
+      $("clock").textContent = isoNow().slice(11,19)+" · MTY";
+      $("rolLine").textContent = "ROL · "+(ui.rol||"—");
+      if (!folio) { $("folioLine").textContent="SIN FOLIO"; $("estadoLine").textContent="SIN ORIGEN"; $("btnArribo").disabled=true; $("btnReset").disabled=true; return; }
+      $("folioLine").textContent=folio.folio_vivo; $("canalLine").textContent="CANAL · "+folio.canal;
+      $("estadoLine").textContent=folio.estado; $("estadoLine").className = folio.estado==="SELLADO"?"st-ok":"st-on";
+      $("btnArribo").disabled = !folio.recepcion.origen || !!folio.arribo.hora_arribo;
+      $("btnReset").disabled = folio.estado === "SELLADO";
+      if (folio.arribo.hora_arribo) { $("btnArribo").textContent="ARRIBO · "+folio.arribo.hora_arribo.slice(11,19); $("btnArribo").classList.add("on"); $("boxEscena").classList.remove("hidden"); $("brutoRec").readOnly=true; }
+    }
+    function iphFlag() { return ui.cod==="SE_DIO_A_LA_FUGA" && (ui.cjem||ui.pro||ui.penal); }
+    function needsRnd() {
+      if (!folio || ui.hayDet!==true) return false;
+      if (ui.destA==="RESG_INC") return false;
+      return ui.destA==="PAD_JC"||ui.destA==="PAD_MP"||ui.tras==="TRASLADO_JC"||ui.tras==="TRASLADO_MP";
+    }
+    function canSeal() {
+      if (!folio || !folio.arribo.hora_arribo) return false;
+      if ((ui.abo || (folio && folio.modo_nacimiento==="INICIATIVA_PROPIA") || ui.cod==="INSP_SIN_NOV" || ui.cod==="INFRAC_VIAL") && !ui.causa) return false;
+      if (ui.rol==="APOYO") return !!ui.cod;
+      if (ui.hayDet===false) {
+        if (!ui.cod) return false;
+        if ((ui.cjem||ui.pro) && ui.cod==="CONCILIADO") return false;
+        if (ui.penal && BLOQ.has(ui.cod)) return false;
+        return true;
+      }
+      if (ui.hayDet===true) {
+        if (!ui.fund||!ui.tras||!ui.ruta) return false;
+        if (ui.fund==="FALTA_ADMIN" && !ui.falta) return false;
+        if (ui.ruta==="A" && !ui.destA) return false;
+        if (ui.ruta==="B" && !(ui.aut&&ui.med&&ui.cond)) return false;
+        if (ui.aut==="DIR" && ui.med==="PRE") return false;
+        if (needsRnd() && !RND_RE.test(($("rndInput").value||"").trim().toUpperCase())) return false;
+        return true;
+      }
+      return false;
+    }
+    function refreshSeal() {
+      const ok=canSeal();
+      $("btnSellar").disabled=!ok;
+      $("btnSellar").textContent=ok?"SELLAR Y GENERAR HASH SHA-256":"SELLAR · INCOMPLETO";
+      $("iphBanner").classList.toggle("on", iphFlag());
+      $("rndBox").classList.toggle("hidden", !needsRnd());
+    }
+    function showView(n) {
+      ["captura","indicios","cierre"].forEach((v)=>$("view-"+v).classList.toggle("hidden", v!==n));
+      document.querySelectorAll(".nav button").forEach((b)=>b.classList.toggle("on", b.dataset.view===n));
+      $("btnProcesar").classList.toggle("hidden", n!=="captura");
+      $("btnSellar").classList.toggle("hidden", n!=="cierre");
+      if (n==="cierre") {
+        $("cierreApoyo").classList.toggle("hidden", ui.rol!=="APOYO");
+        $("cierrePrin").classList.toggle("hidden", ui.rol!=="PRINCIPAL");
+        if (ui.rol==="APOYO" && !$("accApoyo").dataset.ok) {
+          $("accApoyo").innerHTML = APOYO.map(([c,l])=>'<button type="button" class="btn apy" data-cod="'+c+'">'+l+"</button>").join("");
+          $("accApoyo").dataset.ok="1";
+          document.querySelectorAll(".apy").forEach((b)=>b.onclick=()=>{ ui.cod=b.dataset.cod; mark(document.querySelectorAll(".apy"), b); refreshSeal(); });
+        }
+        refreshSeal();
+      }
+    }
+    $("rolP").onclick=()=>{ ui.rol="PRINCIPAL"; $("rolP").classList.add("on"); $("rolA").classList.remove("on"); pintar(); };
+    $("rolA").onclick=()=>{ ui.rol="APOYO"; $("rolA").classList.add("on"); $("rolP").classList.remove("on"); pintar(); };
+    document.querySelectorAll(".orig").forEach((b)=>b.onclick=()=>{ if(!ui.rol){toast("Primero el rol");return;} mark(document.querySelectorAll(".orig"), b); $("btnAuxilio").classList.remove("on"); nacer(b.dataset.origen,false); });
+    document.querySelectorAll(".aboc").forEach((b)=>b.onclick=()=>{ ui.causa=b.dataset.cod; ui.abo=true; mark(document.querySelectorAll(".aboc"), b); mark(document.querySelectorAll(".abo"), null); document.querySelectorAll(".abo").forEach((x)=>{ if(x.dataset.cod===ui.causa) x.classList.add("on"); }); refreshSeal(); });
+    $("btnAuxilio").onclick=()=>{ if(!ui.rol){toast("Primero el rol");return;} mark(document.querySelectorAll(".orig"),null); $("btnAuxilio").classList.add("on"); nacer("AUXILIO_FLAGRANCIA",true); };
+    $("btnArribo").onclick=()=>{
+      if(!folio||folio.arribo.hora_arribo) return;
+      folio.bruto_recepcion=$("brutoRec").value.trim();
+      const h=isoNow(); folio.arribo.hora_arribo=h;
+      const a=Date.parse(h), r=Date.parse(folio.recepcion.hora_recepcion);
+      folio.tiempo_respuesta_seg=Number.isFinite(a-r)?Math.max(0,Math.round((a-r)/1000)):null;
+      folio.estado="EN_PUNTO"; persist(); pintar();
+    };
+    $("btnProcesar").onclick=()=>{
+      if(!folio){ $("btnProcesar").textContent="FALTA ORIGEN"; setTimeout(()=>$("btnProcesar").textContent="PROCESAR EVENTO",800); return; }
+      folio.bruto_recepcion=$("brutoRec").value.trim(); folio.bruto_escena=$("brutoEsc").value.trim();
+      if(folio.arribo.hora_arribo) folio.estado="EN_ATENCION"; persist(); pintar();
+      $("tira").classList.add("on"); $("t1").textContent=folio.recepcion.origen;
+      $("t2").textContent=folio.tiempo_respuesta_seg==null?"S/D":folio.tiempo_respuesta_seg+"s";
+      $("t3").textContent=folio.rol_unidad; $("t4").textContent=folio.bruto_escena?"escena viva":"falta escena";
+    };
+    $("detNo").onclick=()=>{
+      ui.hayDet=false; if(folio) folio.hay_detenido=false;
+      $("detNo").classList.add("on"); $("detSi").classList.remove("on");
+      $("sinDet").classList.remove("hidden"); $("conDet").classList.add("hidden");
+      if(!$("famBtns").dataset.ok){
+        $("famBtns").innerHTML=Object.keys(FAM).map((f)=>'<button type="button" class="btn fam" data-fam="'+f+'">'+f.replace("_"," ")+"</button>").join("");
+        $("famBtns").dataset.ok="1";
+        document.querySelectorAll(".fam").forEach((b)=>b.onclick=()=>{
+          ui.fam=b.dataset.fam; ui.cod=null; mark(document.querySelectorAll(".fam"), b);
+          if(ui.fam==="ESCENA_PENAL"){ ui.penal=true; $("bitPenal").textContent="ESCENA PENAL · ON"; $("bitPenal").classList.add("on"); }
+          $("codBtns").innerHTML=FAM[ui.fam].map(([c,l])=>{
+            const lock=(ui.penal||ui.cjem||ui.pro)&&BLOQ.has(c);
+            return '<button type="button" class="btn cod'+(lock?" lock":"")+'" data-cod="'+c+'" '+(lock?"disabled":"")+">"+l+"</button>";
+          }).join("");
+          document.querySelectorAll(".cod").forEach((x)=>x.onclick=()=>{ if(x.disabled) return; ui.cod=x.dataset.cod; mark(document.querySelectorAll(".cod"), x); refreshSeal(); });
+          refreshSeal();
+        });
+      }
+      refreshSeal();
+    };
+    $("detSi").onclick=()=>{
+      ui.hayDet=true; if(folio) folio.hay_detenido=true;
+      $("detSi").classList.add("on"); $("detNo").classList.remove("on");
+      $("conDet").classList.remove("hidden"); $("sinDet").classList.add("hidden");
+      if(!$("fundBtns").dataset.ok){
+        $("fundBtns").innerHTML=FUND.map(([c,l])=>'<button type="button" class="btn fund" data-cod="'+c+'">'+l+"</button>").join("");
+        $("fundBtns").dataset.ok="1";
+        document.querySelectorAll(".fund").forEach((b)=>b.onclick=()=>{ ui.fund=b.dataset.cod; mark(document.querySelectorAll(".fund"), b); $("faltaBox").classList.toggle("hidden", ui.fund!=="FALTA_ADMIN"); refreshSeal(); });
+      }
+      if(!$("destA").dataset.ok){
+        $("destA").innerHTML=DEST_A.map(([c,l])=>'<button type="button" class="btn da" data-cod="'+c+'">'+l+"</button>").join("");
+        $("destA").dataset.ok="1";
+        document.querySelectorAll(".da").forEach((b)=>b.onclick=()=>{
+          ui.destA=b.dataset.cod; mark(document.querySelectorAll(".da"), b);
+          if(folio && ui.destA==="RESG_INC") folio.canal="ADMIN_EBRIEDAD";
+          if(folio && ui.destA==="PAD_MP") folio.canal="TACTICO";
+          refreshSeal(); pintar();
+        });
+      }
+      refreshSeal();
+    };
+    $("bitPenal").onclick=()=>{ ui.penal=!ui.penal; $("bitPenal").textContent=ui.penal?"ESCENA PENAL · ON":"ESCENA PENAL · OFF"; $("bitPenal").classList.toggle("on", ui.penal); if(folio) folio.escena_penal=ui.penal; refreshSeal(); };
+    document.querySelectorAll(".falta").forEach((b)=>b.onclick=()=>{ ui.falta=b.dataset.cod; mark(document.querySelectorAll(".falta"), b); refreshSeal(); });
+    document.querySelectorAll(".tras").forEach((b)=>b.onclick=()=>{ ui.tras=b.dataset.cod; mark(document.querySelectorAll(".tras"), b); refreshSeal(); });
+    $("rutaA").onclick=()=>{ ui.ruta="A"; $("rutaA").classList.add("on"); $("rutaB").classList.remove("on"); $("destA").classList.remove("hidden"); $("destB").classList.add("hidden"); refreshSeal(); };
+    $("rutaB").onclick=()=>{ ui.ruta="B"; $("rutaB").classList.add("on"); $("rutaA").classList.remove("on"); $("destB").classList.remove("hidden"); $("destA").classList.add("hidden"); refreshSeal(); };
+    document.querySelectorAll(".aut").forEach((b)=>b.onclick=()=>{ ui.aut=b.dataset.cod; mark(document.querySelectorAll(".aut"), b); refreshSeal(); });
+    document.querySelectorAll(".med").forEach((b)=>b.onclick=()=>{ ui.med=b.dataset.cod; mark(document.querySelectorAll(".med"), b); refreshSeal(); });
+    document.querySelectorAll(".cond").forEach((b)=>b.onclick=()=>{ ui.cond=b.dataset.cod; mark(document.querySelectorAll(".cond"), b); refreshSeal(); });
+    $("togVeh").onclick=()=>{ ui.veh=!ui.veh; $("togVeh").classList.toggle("on", ui.veh); $("boxVeh").classList.toggle("hidden", !ui.veh); };
+    $("togHal").onclick=()=>{ ui.hal=!ui.hal; $("togHal").classList.toggle("on", ui.hal); $("boxHal").classList.toggle("hidden", !ui.hal); };
+    $("togAbo").onclick=()=>{ ui.abo=!ui.abo; $("togAbo").classList.toggle("on", ui.abo); $("boxAbo").classList.toggle("hidden", !ui.abo); refreshSeal(); };
+    $("togCjem").onclick=()=>{ ui.cjem=!ui.cjem; $("togCjem").classList.toggle("on", ui.cjem); refreshSeal(); };
+    $("togPro").onclick=()=>{ ui.pro=!ui.pro; $("togPro").classList.toggle("on", ui.pro); refreshSeal(); };
+    document.querySelectorAll(".vdest").forEach((b)=>b.onclick=()=>{ ui.vdest=b.dataset.cod; mark(document.querySelectorAll(".vdest"), b); });
+    document.querySelectorAll(".abo").forEach((b)=>b.onclick=()=>{ ui.causa=b.dataset.cod; mark(document.querySelectorAll(".abo"), b); refreshSeal(); });
+    $("rndInput").oninput=refreshSeal;
+    $("btnReset").onclick=()=>{
+      if(!folio || folio.estado==="SELLADO") return;
+      if(!resetArm){ resetArm=true; $("btnReset").textContent="TOCA DE NUEVO PARA BORRAR"; $("btnReset").classList.add("arm"); setTimeout(()=>{ resetArm=false; $("btnReset").textContent="DESCARTAR BORRADOR"; $("btnReset").classList.remove("arm"); },4000); return; }
+      resetBorrador();
+    };
+    $("btnSellar").onclick=async ()=>{
+      if(!canSeal()||!folio) return;
+      folio.bruto_recepcion=$("brutoRec").value.trim(); folio.bruto_escena=$("brutoEsc").value.trim();
+      folio.hay_detenido=ui.hayDet===true; folio.escena_penal=ui.penal||ui.fam==="ESCENA_PENAL"; folio.iph_sin_detenido=iphFlag();
+      folio.resultado={ familia: ui.rol==="APOYO"?"ACCION_APOYO":(ui.hayDet?(ui.ruta==="B"?"CON_DET_B":"CON_DET_A"):ui.fam), codigo: ui.hayDet&&ui.ruta==="B"?ui.cond:(ui.cod||ui.destA) };
+      if(ui.hayDet){ folio.fundamento_detencion=ui.fund; folio.falta_admin=ui.falta; folio.traslado=ui.tras; if(needsRnd()) folio.rnd=($("rndInput").value||"").trim().toUpperCase(); if(ui.ruta==="B") folio.instruccion={autoridad:ui.aut,medio:ui.med,verificacion:ui.med==="PRE"?"PENDIENTE":"CONTRASTABLE"}; }
+      if(ui.veh) folio.vehiculo={ placas:($("placas").value.trim()||"S/D"), destino:ui.vdest||"S/D" };
+      if(ui.hal) folio.hallazgo={ texto:($("halDesc").value.trim()||"S/D"), acta_pendiente:true };
+      if(ui.causa) folio.causa_abordaje=ui.causa;
+      const canon = JSON.stringify({ folio_vivo:folio.folio_vivo, origen:folio.recepcion.origen, causa:ui.causa||null, resultado:folio.resultado, fundamento:folio.fundamento_detencion||null, rnd:folio.rnd||null, horas:{r:folio.recepcion.hora_recepcion,a:folio.arribo.hora_arribo} });
+      folio.hash_sha256 = await sha256(canon);
+      folio.estado="SELLADO"; persist(); pintar();
+      $("btnReset").disabled = true;
+      toast((folio.iph_sin_detenido?"IPH_SIN_DETENIDO · ":"")+"HASH "+folio.hash_sha256.slice(0,12)+"…");
+    };
+    document.querySelectorAll(".nav button").forEach((b)=>b.onclick=()=>showView(b.dataset.view));
+    $("cam").onchange=()=>{ $("indicioMsg").textContent="Toma en cascarón. Hash = Fase 3."; };
+    if (window.visualViewport) {
+      const place=()=>{ const vv=window.visualViewport; $("dock").style.bottom=Math.max(0, window.innerHeight-vv.height-vv.offsetTop)+"px"; };
+      visualViewport.addEventListener("resize", place); visualViewport.addEventListener("scroll", place);
+    }
+    setInterval(()=>{ if(!folio) $("clock").textContent=isoNow().slice(11,19)+" · MTY"; },1000);
+    showView("captura"); pintar();
+  </script>
+</body>
+</html>
